@@ -15,17 +15,20 @@
 
 #define DELAY 40
 #define GRAVITY 13
+#define BALL_GRAVITY 15
 
-int WIDTH = 1200;
-int HEIGHT = 800;
-int BOTTOM_MARGIN = 100;
+#define WIDTH 1200
+#define HEIGHT 800
+#define BOTTOM_MARGIN 100
+#define BALL_SPEED_COEFFICIENT 0.78
 
-int CHAR_HEIGHT = 150;
-
-int y_mouse, x_mouse;
-Uint32 mouse_state;
+#define CHAR_HEIGHT 150
 
 using namespace std;
+
+int mouse_check_index = 0;
+Uint32 mouse_state;
+int x_mouse, y_mouse;
 
 // global variables
 TTF_Font *gfont = NULL;
@@ -278,7 +281,7 @@ typedef struct Ball
 private:
     int vx = 0;
     int vy = 0;
-    Uint8 ay = GRAVITY;
+    Uint8 ay = BALL_GRAVITY;
 
     bool freezed = false;
 
@@ -784,7 +787,7 @@ bool Character::ball_foot_collision()
                 ball->set_x(ball->get_x() + 20);
             }
             {
-                ball->set_vx(dx - ball->get_vx() * 0.95);
+                ball->set_vx(dx - ball->get_vx() * BALL_SPEED_COEFFICIENT);
                 ball->set_vy(dy + 30);
             }
         }
@@ -795,7 +798,7 @@ bool Character::ball_foot_collision()
                 ball->set_x(ball->get_x() - 20);
             }
             {
-                ball->set_vx(dx - ball->get_vx() * 0.95);
+                ball->set_vx(dx - ball->get_vx() * BALL_SPEED_COEFFICIENT);
                 ball->set_vy(dy + 30);
             }
         }
@@ -814,7 +817,7 @@ bool Character::ball_foot_collision()
             {
                 ball->set_x(ball->get_x() + (type == CHARACTER_LEFT ? 20 : -20));
             }
-            ball->set_vx(dx - ball->get_vx() * 0.95);
+            ball->set_vx(dx - ball->get_vx() * BALL_SPEED_COEFFICIENT);
             ball->set_vy(dy - ball->get_vy());
         }
         // Check for powers
@@ -1098,11 +1101,9 @@ public:
 } TextBox;
 void TextBox::read_keys_and_mouse()
 {
-    int x = x_mouse, y = y_mouse;
-
     if (mouse_state & SDL_BUTTON_LMASK)
     {
-        if (SDL_PointInRect(new SDL_Point{x, y}, &bounds))
+        if (SDL_PointInRect(new SDL_Point{x_mouse, y_mouse}, &bounds))
         {
             enabled = true;
         }
@@ -1114,9 +1115,6 @@ void TextBox::read_keys_and_mouse()
 
     if (enabled)
     {
-        SDL_PumpEvents();
-        SDL_Delay(DELAY);
-        SDL_PollEvent(e);
         if (e->type == SDL_KEYDOWN)
         {
             switch (e->key.keysym.sym)
@@ -1273,20 +1271,26 @@ bool Button::is_clicked(bool b_while = false)
 {
     if (b_while)
     {
-        mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
+        SDL_Event *e = new SDL_Event();
         SDL_PumpEvents();
+        if (SDL_PollEvent(e))
+        {
+            if (e->type == SDL_MOUSEBUTTONUP)
+            {
+                mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
+            }
+        }
     }
-
     return ((SDL_PointInRect(new SDL_Point{x_mouse, y_mouse}, &bounds) && (mouse_state & SDL_BUTTON_LMASK)));
 }
 void Button::render(SDL_Renderer *renderer, SDL_Texture *dst, SDL_Rect *srcrect)
 {
-    int x = x_mouse, y = y_mouse;
+
     SDL_Texture *former_texture = SDL_GetRenderTarget(renderer);
     SDL_SetRenderTarget(renderer, NULL);
     SDL_RenderCopy(renderer, back_texture, srcrect, &bounds);
 
-    if (SDL_PointInRect(new SDL_Point{x, y}, &bounds))
+    if (SDL_PointInRect(new SDL_Point{x_mouse, y_mouse}, &bounds))
     {
         SDL_SetRenderDrawColor(renderer, 250, 100, 0, 255);
         SDL_RenderDrawRect(renderer, &bounds);
@@ -1315,51 +1319,25 @@ void clear_window(SDL_Renderer *m_renderer)
     SDL_SetRenderDrawColor(m_renderer, back_color.r, back_color.g, back_color.b, 255);
     SDL_RenderClear(m_renderer);
 }
-void window_stuff(SDL_Renderer *m_renderer, SDL_Event *e, SDL_Window *win_main)
+void window_stuff(SDL_Renderer *m_renderer, SDL_Event *e)
 {
-    while (SDL_PollEvent(e))
+    if (SDL_PollEvent(e))
     {
-        switch ((*e).type)
+        if (e->type == SDL_QUIT)
         {
-        case SDL_QUIT:
             Game_State = STATE_QUIT;
-            break;
-        case SDL_KEYDOWN:
-            if ((*e).key.keysym.sym == 'q')
+        }
+        if ((e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN))
+        {
+            printf("getting mouse state \n");
+            mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
+            while (SDL_PollEvent(e))
             {
-                Game_State = STATE_QUIT;
-            }
-            break;
-        case SDL_MOUSEMOTION:
-
-            mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
-
-            break;
-        case SDL_MOUSEBUTTONDOWN:
-
-            mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
-
-            break;
-        case SDL_MOUSEBUTTONUP:
-
-            mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
-
-            break;
-        case SDL_WINDOWEVENT:
-
-            if ((*e).window.event == SDL_WINDOWEVENT_RESIZED)
-            {
-                SDL_Window *win = SDL_GetWindowFromID((*e).window.windowID);
-                if (win == win_main)
-                {
-                    // SDL_GetWindowSize(win_main, &WIDTH, &HEIGHT);
-                    // CHAR_HEIGHT = (WIDTH + HEIGHT) / 13;
-                    // BOTTOM_MARGIN = (WIDTH + HEIGHT) / 20;
+                if(!(e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN)){
+                    break;
                 }
-                win = NULL;
             }
-
-            break;
+            
         }
     }
 
@@ -1375,7 +1353,6 @@ int main(int argc, char *argv[])
     // Initialization of SDL window
     {
         Uint32 SDL_flags = SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_AUDIO;
-        // Uint32 WND_flags = SDL_WINDOW_RESIZABLE;
         Uint32 WND_flags = SDL_WINDOW_HIDDEN;
         int result = Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024);
         if (SDL_Init(SDL_flags) < 0 || TTF_Init() < 0 || IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG) == 0 || Mix_Init(MIX_INIT_MP3) == 0 || result != 0)
@@ -1421,7 +1398,7 @@ int main(int argc, char *argv[])
     //-----====-Main game loop start-====-----
     while (1)
     {
-        window_stuff(m_renderer, e, m_window);
+        window_stuff(m_renderer, e);
         l_char.set_goals(0);
         r_char.set_goals(0);
         r_char.set_x(WIDTH - 200 - 100);
@@ -1476,7 +1453,7 @@ int main(int argc, char *argv[])
                     start.play_click();
                     Game_State = STATE_GET_NAMES;
                 }
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
         }
         if (Game_State == STATE_SETTING)
@@ -1618,7 +1595,7 @@ int main(int argc, char *argv[])
                     Game_State = STATE_START_MENU;
                 }
 
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
         }
         if (Game_State == STATE_GET_NAMES)
@@ -1657,7 +1634,7 @@ int main(int argc, char *argv[])
                 {
                     render_text_center(m_renderer, "Names should be diffrent and non empty!", new SDL_Point{WIDTH / 2, HEIGHT / 2}, names_font, {200, 50, 50, 255});
                 }
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
         }
         if (Game_State == STATE_SELECT_BALL)
@@ -1721,7 +1698,7 @@ int main(int argc, char *argv[])
                     Game_State = STATE_SELECT_CHAR;
                 }
 
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
         }
         if (Game_State == STATE_SELECT_CHAR)
@@ -1818,7 +1795,7 @@ int main(int argc, char *argv[])
                     Game_State = STATE_GAMING;
                 }
 
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
         }
         if (Game_State == STATE_GAMING)
@@ -1863,7 +1840,7 @@ int main(int argc, char *argv[])
             btn_quit.set_text("quit");
 
             string powers_str[] = {"Kick Fire", "Punch", "Ball Eater", "Thief"};
-            ball.set_ay(GRAVITY);
+            ball.set_ay(BALL_GRAVITY);
             ball.set_center({WIDTH / 2, HEIGHT / 2});
 
             game_timer.play();
@@ -2029,7 +2006,7 @@ int main(int argc, char *argv[])
                     Game_State = STATE_END_MENU;
                 }
 
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
             SDL_DestroyTexture(goal_l);
             SDL_DestroyTexture(goal_r);
@@ -2081,7 +2058,7 @@ int main(int argc, char *argv[])
                     Game_State = STATE_QUIT;
                 }
 
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
         }
         if (Game_State == STATE_QUIT)
@@ -2098,7 +2075,7 @@ int main(int argc, char *argv[])
                 {
                     break;
                 }
-                window_stuff(m_renderer, e, m_window);
+                window_stuff(m_renderer, e);
             }
             if (time.check_alarm())
             {
