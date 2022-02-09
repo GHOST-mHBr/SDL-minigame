@@ -9,7 +9,7 @@ head football. The university final project **( Of [GHOST-mHBr](https://github.c
 ## Changes :
 
 - Optimization Keyboard and Mouse Controlling
-- Change Screen size and Cleanup code (For customize screen size see [here](###))
+- Change Screen size and Cleanup code ( For customize screen size see [here](#to-change-screen-size-manually-change-this-line-of-code-and-remake-project-:) )
 - Optimize Gravity and Speed of Ball and Character
 
 
