@@ -14,14 +14,15 @@
 #define FONT_ADDR "font.otf"
 
 #define DELAY 29
-#define SKIP_KAYBOARD_TIMES 350
+#define SKIP_KAYBOARD_TIMES 5
 #define GRAVITY 13
 #define BALL_GRAVITY 15
+#define BALL_HIDE_TIME 1300
 
-#define WIDTH 1200
-#define HEIGHT 800
-#define BOTTOM_MARGIN 100
+int WIDTH = 1200 , HEIGHT = 800;
+#define BOTTOM_MARGIN 200
 #define BALL_SPEED_COEFFICIENT 0.78
+#define FIRE_SIZE_OF_KICKFIRE 150
 
 #define CHAR_HEIGHT 150
 
@@ -443,7 +444,7 @@ void Ball::render(SDL_Renderer *renderer)
         {
             start_invisibility_time = SDL_GetTicks();
         }
-        if (SDL_GetTicks() - start_invisibility_time > 3000)
+        if (SDL_GetTicks() - start_invisibility_time > BALL_HIDE_TIME)
         {
             start_invisibility_time = 0;
             power = NONE;
@@ -762,7 +763,7 @@ bool Character::ball_head_colision()
             switch (ball->get_power())
             {
             case KICKFIRE:
-                bounds.x = bounds.x + (type == CHARACTER_LEFT ? -100 : 100);
+                bounds.x = bounds.x + (type == CHARACTER_LEFT ? -FIRE_SIZE_OF_KICKFIRE : FIRE_SIZE_OF_KICKFIRE);
                 mode = CONFUSED;
                 ball->set_power(NONE, name);
                 break;
@@ -1352,6 +1353,9 @@ void window_stuff(SDL_Renderer *m_renderer, SDL_Event *e)
                 if (!(e->type == SDL_KEYDOWN && i < SKIP_KAYBOARD_TIMES))
                 {
                     i = 0;
+                    if(e->type == SDL_KEYUP){
+                        event = *e;
+                    }
                     break;
                 }
             }
