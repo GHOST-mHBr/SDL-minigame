@@ -13,7 +13,8 @@
 #define CHAR_RAW_ROOT "./raw/Char/"
 #define FONT_ADDR "font.otf"
 
-#define DELAY 40
+#define DELAY 29
+#define SKIP_KAYBOARD_TIMES 350
 #define GRAVITY 13
 #define BALL_GRAVITY 15
 
@@ -29,6 +30,9 @@ using namespace std;
 int mouse_check_index = 0;
 Uint32 mouse_state;
 int x_mouse, y_mouse;
+
+int render_character_index_1 = 0;
+int render_character_index_2 = 0;
 
 // global variables
 TTF_Font *gfont = NULL;
@@ -1327,17 +1331,31 @@ void window_stuff(SDL_Renderer *m_renderer, SDL_Event *e)
         {
             Game_State = STATE_QUIT;
         }
-        if ((e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN))
+        if (e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN)
         {
-            printf("getting mouse state \n");
             mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
             while (SDL_PollEvent(e))
             {
-                if(!(e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN)){
+                if (!(e->type == SDL_MOUSEMOTION || e->type == SDL_MOUSEBUTTONDOWN))
+                {
+                    mouse_state = SDL_GetMouseState(&x_mouse, &y_mouse);
                     break;
                 }
             }
-            
+        }
+        if (e->type == SDL_KEYDOWN && Game_State == STATE_GAMING)
+        {
+            SDL_Event event = *e;
+            int i = 0;
+            while (SDL_PollEvent(e))
+            {
+                if (!(e->type == SDL_KEYDOWN && i < SKIP_KAYBOARD_TIMES))
+                {
+                    i = 0;
+                    break;
+                }
+            }
+            *e = event;
         }
     }
 
@@ -1936,6 +1954,7 @@ int main(int argc, char *argv[])
                 render_text_left(m_renderer, powers_str[r_char.get_power()].c_str(), new SDL_Point{p_r.x + p_r.w, p_r.y + p_r.h / 2}, NULL, {255, 255, 220, 255});
 
                 // render characters and power bars
+
                 r_char.render(m_renderer);
                 l_char.render(m_renderer);
                 ball.render(m_renderer);
