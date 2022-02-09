@@ -12,19 +12,18 @@
 
 #define CHAR_RAW_ROOT "./raw/Char/"
 #define FONT_ADDR "font.otf"
+#define SCREEN_SCALE 3
 
 #define DELAY 29
 #define SKIP_KAYBOARD_TIMES 5
 #define GRAVITY 13
-#define BALL_GRAVITY 15
+#define BALL_GRAVITY 13
 #define BALL_HIDE_TIME 1300
 
-int WIDTH = 1200 , HEIGHT = 800;
-#define BOTTOM_MARGIN 200
+const int WIDTH = 300 * SCREEN_SCALE , HEIGHT = 200 * SCREEN_SCALE;
+const int BOTTOM_MARGIN = 25 * SCREEN_SCALE , CHAR_HEIGHT = 37.5 * SCREEN_SCALE;
 #define BALL_SPEED_COEFFICIENT 0.78
 #define FIRE_SIZE_OF_KICKFIRE 150
-
-#define CHAR_HEIGHT 150
 
 using namespace std;
 
@@ -483,8 +482,8 @@ private:
     float head_to_height_ratio = 0.75;
     float shoes_to_height_ratio = 0.25;
 
-    const int x_speed = 20;
-    const int y_speed = 75;
+    const int x_speed = 8 * 3.2 * SCREEN_SCALE / 4;
+    const int y_speed = 30 * 3.2 * SCREEN_SCALE / 4;
 
     int dx = 0, dy = 0, dvy = 0;
     int keys[4] = {SDLK_RIGHT, SDLK_LEFT, SDLK_UP, SDLK_DOWN};
@@ -831,7 +830,7 @@ bool Character::ball_foot_collision()
             switch (ball->get_power())
             {
             case KICKFIRE:
-                bounds.x = bounds.x + (type == CHARACTER_LEFT ? -100 : 100);
+                bounds.x = bounds.x + (type == CHARACTER_LEFT ? -FIRE_SIZE_OF_KICKFIRE : FIRE_SIZE_OF_KICKFIRE);
                 mode = CONFUSED;
                 ball->set_power(NONE, name);
                 break;
@@ -940,7 +939,7 @@ private:
     SDL_Color back_color;
     SDL_Rect bounds;
     SDL_Texture *back_texture = NULL;
-    TTF_Font *font = TTF_OpenFont("./arial.ttf", 20);
+    TTF_Font *font = TTF_OpenFont("./arial.ttf", 5 * SCREEN_SCALE);
 
 public:
     ProgressBar(Uint16 total_value, Uint16 current_value, SDL_Color front_color, SDL_Color back_color, SDL_Rect bounds)
@@ -1055,7 +1054,7 @@ typedef struct Text
 {
     std::string text = " ";
     SDL_Color color = {0, 0, 0, 255};
-    int ptsize = 20;
+    int ptsize = 5 * SCREEN_SCALE;
     std::string font_addr = FONT_ADDR;
     TTF_Font *font = TTF_OpenFont(font_addr.c_str(), ptsize);
 
@@ -1397,22 +1396,23 @@ int main(int argc, char *argv[])
 
         SDL_Surface *icon = IMG_Load("raw/Balls/0.png");
         SDL_SetWindowIcon(m_window, icon);
+        SDL_SetWindowTitle(m_window,"Baller");
         SDL_FreeSurface(icon);
     }
 
     SDL_Event *e = new SDL_Event;
     srand(time(nullptr));
 
-    TTF_Font *names_font = TTF_OpenFont(FONT_ADDR, 50);
-    TTF_Font *time_font = TTF_OpenFont("score_board.ttf", 60);
-    TTF_Font *scores_font = TTF_OpenFont("score_board.ttf", 80);
-    gfont = TTF_OpenFont(FONT_ADDR, 20);
+    TTF_Font *names_font = TTF_OpenFont(FONT_ADDR, 12.5 * SCREEN_SCALE);
+    TTF_Font *time_font = TTF_OpenFont("score_board.ttf", 15 * SCREEN_SCALE);
+    TTF_Font *scores_font = TTF_OpenFont("score_board.ttf", 20 * SCREEN_SCALE);
+    gfont = TTF_OpenFont(FONT_ADDR, 5 * SCREEN_SCALE);
 
     SDL_Point ball_center{WIDTH / 2, HEIGHT - BOTTOM_MARGIN};
-    Ball ball(&ball_center, 20, 30, 0);
+    Ball ball(&ball_center, 20, (int)(7.5 * SCREEN_SCALE), 0);
 
-    Character l_char(m_renderer, e, {200, HEIGHT - BOTTOM_MARGIN - CHAR_HEIGHT, 100, CHAR_HEIGHT}, CHARACTER_LEFT, &ball, static_cast<Powers>(rand() % 4), 1, 0, 3);
-    Character r_char(m_renderer, e, {WIDTH - 200 - 100, HEIGHT - BOTTOM_MARGIN - CHAR_HEIGHT, 100, CHAR_HEIGHT}, CHARACTER_RIGHT, &ball, static_cast<Powers>(rand() % 4), 0, 1, 2);
+    Character l_char(m_renderer, e, {50 * SCREEN_SCALE, HEIGHT - BOTTOM_MARGIN - CHAR_HEIGHT, 25 * SCREEN_SCALE, CHAR_HEIGHT}, CHARACTER_LEFT, &ball, static_cast<Powers>(rand() % 4), 1, 0, 3);
+    Character r_char(m_renderer, e, {WIDTH - 50 * SCREEN_SCALE - 25 * SCREEN_SCALE, HEIGHT - BOTTOM_MARGIN - CHAR_HEIGHT, 25 * SCREEN_SCALE, CHAR_HEIGHT}, CHARACTER_RIGHT, &ball, static_cast<Powers>(rand() % 4), 0, 1, 2);
 
     play_long_sounds("raw/sounds/main-menu.wav");
 
@@ -1423,30 +1423,30 @@ int main(int argc, char *argv[])
         window_stuff(m_renderer, e);
         l_char.set_goals(0);
         r_char.set_goals(0);
-        r_char.set_x(WIDTH - 200 - 100);
-        l_char.set_x(200);
+        r_char.set_x(WIDTH - 50 * SCREEN_SCALE - 25 * SCREEN_SCALE);
+        l_char.set_x(50 * SCREEN_SCALE);
 
         if (Game_State == STATE_START_MENU)
         {
             // Initialization
             // Game_State = STATE_GET_NAMES;
-            Button start(m_renderer, SDL_Color{210, 250, 200, 255}, SDL_Rect{WIDTH / 2 - 100, 250, 200, 60});
-            Button setting(m_renderer, SDL_Color{250, 220, 250, 255}, SDL_Rect{WIDTH / 2 - 100, 400, 200, 60});
-            Button quit(m_renderer, SDL_Color{250, 210, 200, 255}, SDL_Rect{WIDTH / 2 - 100, 550, 200, 60});
+            Button start(m_renderer, SDL_Color{210, 250, 200, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, (int)(62.5 * SCREEN_SCALE), 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button setting(m_renderer, SDL_Color{250, 220, 250, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 100 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button quit(m_renderer, SDL_Color{250, 210, 200, 255}, SDL_Rect{(int) (WIDTH / 2 - 25 * SCREEN_SCALE),(int) (137.5 * SCREEN_SCALE), 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
 
             start.set_text("Start");
             setting.set_text("Setting");
             quit.set_text("Quit");
-            start.set_text_size(20);
-            quit.set_text_size(20);
-            setting.set_text_size(20);
+            start.set_text_size(5 * SCREEN_SCALE);
+            quit.set_text_size(5 * SCREEN_SCALE);
+            setting.set_text_size(5 * SCREEN_SCALE);
 
-            TTF_Font *welcome_font = TTF_OpenFont(FONT_ADDR, 50);
+            TTF_Font *welcome_font = TTF_OpenFont(FONT_ADDR, (int)(12.5 * SCREEN_SCALE));
             // Loop
             while (Game_State == STATE_START_MENU)
             {
                 clear_window(m_renderer);
-                render_text_center(m_renderer, "Welcome!", new SDL_Point{WIDTH / 2, 100}, welcome_font, {200, 200, 200, 255});
+                render_text_center(m_renderer, "Welcome!", new SDL_Point{WIDTH / 2, SCREEN_SCALE * 25}, welcome_font, {200, 200, 200, 255});
                 setting.render(m_renderer);
                 start.render(m_renderer);
                 quit.render(m_renderer);
@@ -1480,17 +1480,17 @@ int main(int argc, char *argv[])
         }
         if (Game_State == STATE_SETTING)
         {
-            Button btn_inc_r(m_renderer, SDL_Color{255, 180, 150, 255}, SDL_Rect{WIDTH / 2 + 100 - 30 - 200, 200 - 30, 60, 60});
-            Button btn_dec_r(m_renderer, SDL_Color{255, 180, 150, 255}, SDL_Rect{WIDTH / 2 - 100 - 30 - 200, 200 - 30, 60, 60});
-            Button btn_inc_g(m_renderer, SDL_Color{150, 255, 180, 255}, SDL_Rect{WIDTH / 2 + 100 - 30 - 200, 320 - 30, 60, 60});
-            Button btn_dec_g(m_renderer, SDL_Color{150, 255, 180, 255}, SDL_Rect{WIDTH / 2 - 100 - 30 - 200, 320 - 30, 60, 60});
-            Button btn_inc_b(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{WIDTH / 2 + 100 - 30 - 200, 440 - 30, 60, 60});
-            Button btn_dec_b(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{WIDTH / 2 - 100 - 30 - 200, 440 - 30, 60, 60});
+            Button btn_inc_r(m_renderer, SDL_Color{255, 180, 150, 255}, SDL_Rect{(int)(WIDTH / 2 + (SCREEN_SCALE * 25) - (57.5 * SCREEN_SCALE)), (int)(45.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_dec_r(m_renderer, SDL_Color{255, 180, 150, 255}, SDL_Rect{(int)(WIDTH / 2 - (SCREEN_SCALE * 25) - (57.5 * SCREEN_SCALE)), (int)(45.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_inc_g(m_renderer, SDL_Color{150, 255, 180, 255}, SDL_Rect{(int)(WIDTH / 2 + (SCREEN_SCALE * 25) - (57.5 * SCREEN_SCALE)), (int)(72.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_dec_g(m_renderer, SDL_Color{150, 255, 180, 255}, SDL_Rect{(int)(WIDTH / 2 - (SCREEN_SCALE * 25) - (57.5 * SCREEN_SCALE)), (int)(72.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_inc_b(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{(int)(WIDTH / 2 + (SCREEN_SCALE * 25) - (57.5 * SCREEN_SCALE)), (int)(102.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_dec_b(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{(int)(WIDTH / 2 - (SCREEN_SCALE * 25) - (57.5 * SCREEN_SCALE)), (int)(102.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
 
-            Button btn_inc_rad(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{WIDTH / 2 - 100 - 30 + 200 + 300, 320 - 30, 60, 60});
-            Button btn_dec_rad(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{WIDTH / 2 - 100 - 30 + 200, 320 - 30, 60, 60});
+            Button btn_inc_rad(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{WIDTH / 2 + (int) (92.5 * SCREEN_SCALE), (int)(72.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_dec_rad(m_renderer, SDL_Color{180, 150, 255, 255}, SDL_Rect{WIDTH / 2 + (int) (17.5 * SCREEN_SCALE), (int)(72.5 * SCREEN_SCALE), 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
 
-            Button btn_return(m_renderer, SDL_Color{200, 200, 200, 255}, SDL_Rect{WIDTH / 2 - 100, 550, 200, 60});
+            Button btn_return(m_renderer, SDL_Color{200, 200, 200, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, (int)(137.5 * SCREEN_SCALE), 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
 
             btn_inc_r.set_text(">");
             btn_dec_r.set_text("<");
@@ -1504,7 +1504,7 @@ int main(int argc, char *argv[])
             ball.set_ay(0);
             ball.set_vx(0);
             ball.set_vy(0);
-            ball.set_center({WIDTH / 2 + 250, 320});
+            ball.set_center({WIDTH / 2 + ((int)(62.5 * SCREEN_SCALE)), 80 * SCREEN_SCALE});
 
             btn_return.set_text("return");
 
@@ -1512,9 +1512,9 @@ int main(int argc, char *argv[])
             {
                 clear_window(m_renderer);
 
-                render_text_center(m_renderer, "red", new SDL_Point{WIDTH / 2 - 200, 200}, NULL, {250, 150, 150, 255});
-                render_text_center(m_renderer, "green", new SDL_Point{WIDTH / 2 - 200, 320}, NULL, {150, 250, 150, 255});
-                render_text_center(m_renderer, "blue", new SDL_Point{WIDTH / 2 - 200, 440}, NULL, {150, 150, 250, 255});
+                render_text_center(m_renderer, "red", new SDL_Point{WIDTH / 2 - 50 * SCREEN_SCALE, 50 * SCREEN_SCALE}, NULL, {250, 150, 150, 255});
+                render_text_center(m_renderer, "green", new SDL_Point{WIDTH / 2 - 50 * SCREEN_SCALE, 80 * SCREEN_SCALE}, NULL, {150, 250, 150, 255});
+                render_text_center(m_renderer, "blue", new SDL_Point{WIDTH / 2 - 50 * SCREEN_SCALE, 110 * SCREEN_SCALE}, NULL, {150, 150, 250, 255});
 
                 btn_dec_r.render(m_renderer);
                 btn_inc_r.render(m_renderer);
@@ -1622,19 +1622,19 @@ int main(int argc, char *argv[])
         }
         if (Game_State == STATE_GET_NAMES)
         {
-            TTF_Font *names_font = TTF_OpenFont(FONT_ADDR, 30);
-            TTF_Font *title_font = TTF_OpenFont(FONT_ADDR, 50);
-            Button btn_next(m_renderer, SDL_Color{140, 240, 150, 255}, SDL_Rect{WIDTH / 2 - 100, 600, 200, 60});
-            TextBox r_ch_tb(NULL, SDL_Color{220, 200, 180, 255}, {800, 200, 200, 80}, e);
-            TextBox l_ch_tb(NULL, SDL_Color{220, 200, 180, 255}, {200, 200, 200, 80}, e);
+            TTF_Font *names_font = TTF_OpenFont(FONT_ADDR, 7.5 * SCREEN_SCALE);
+            TTF_Font *title_font = TTF_OpenFont(FONT_ADDR, 12.5 * SCREEN_SCALE);
+            Button btn_next(m_renderer, SDL_Color{140, 240, 150, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 150 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            TextBox r_ch_tb(NULL, SDL_Color{220, 200, 180, 255}, {200 * SCREEN_SCALE, 50 * SCREEN_SCALE, 50 * SCREEN_SCALE, 20 * SCREEN_SCALE}, e);
+            TextBox l_ch_tb(NULL, SDL_Color{220, 200, 180, 255}, {50 * SCREEN_SCALE, 50 * SCREEN_SCALE, 50 * SCREEN_SCALE, 20 * SCREEN_SCALE}, e);
             btn_next.set_text("Next");
 
             while (Game_State == STATE_GET_NAMES)
             {
                 clear_window(m_renderer);
-                render_text_center(m_renderer, "Enter names:", new SDL_Point{WIDTH / 2, 100}, title_font, {200, 200, 200, 255});
-                render_text_center(m_renderer, "Player2:", new SDL_Point{900, 180}, names_font, {200, 200, 200, 255});
-                render_text_center(m_renderer, "Player1:", new SDL_Point{300, 180}, names_font, {200, 200, 200, 255});
+                render_text_center(m_renderer, "Enter names:", new SDL_Point{WIDTH / 2, 25 * SCREEN_SCALE}, title_font, {200, 200, 200, 255});
+                render_text_center(m_renderer, "Player2:", new SDL_Point{225 * SCREEN_SCALE, 45 * SCREEN_SCALE}, names_font, {200, 200, 200, 255});
+                render_text_center(m_renderer, "Player1:", new SDL_Point{75 * SCREEN_SCALE, 45 * SCREEN_SCALE}, names_font, {200, 200, 200, 255});
                 btn_next.render(m_renderer);
                 r_ch_tb.render(m_renderer);
                 l_ch_tb.render(m_renderer);
@@ -1661,15 +1661,15 @@ int main(int argc, char *argv[])
         }
         if (Game_State == STATE_SELECT_BALL)
         {
-            Button next(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{WIDTH - 400, 400 - 40, 100, 80});
-            Button pervious(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{300, 400 - 40, 100, 80});
-            Button next_level(m_renderer, SDL_Color{140, 240, 150, 255}, SDL_Rect{WIDTH / 2 - 100, 600, 200, 60});
+            Button next(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{WIDTH - 100 * SCREEN_SCALE, 90 * SCREEN_SCALE, 25 * SCREEN_SCALE, 20 * SCREEN_SCALE});
+            Button pervious(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{75 * SCREEN_SCALE, 90 * SCREEN_SCALE, 25 * SCREEN_SCALE, 20 * SCREEN_SCALE});
+            Button next_level(m_renderer, SDL_Color{140, 240, 150, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 150 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
             next.set_text(">");
             pervious.set_text("<");
             next_level.set_text("Next");
 
-            next.set_text_size(50);
-            pervious.set_text_size(50);
+            next.set_text_size(12.5 * SCREEN_SCALE);
+            pervious.set_text_size(12.5 * SCREEN_SCALE);
 
             int current_model = 0;
             ball.set_center({WIDTH / 2, HEIGHT / 2});
@@ -1725,12 +1725,12 @@ int main(int argc, char *argv[])
         }
         if (Game_State == STATE_SELECT_CHAR)
         {
-            Button next_level(m_renderer, SDL_Color{140, 240, 150, 255}, SDL_Rect{WIDTH / 2 - 100, 600, 200, 60});
-            Button l_h_i(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{100, 600, 60, 60});
-            Button l_h_d(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{345, 600, 60, 60});
+            Button next_level(m_renderer, SDL_Color{140, 240, 150, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 150 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button l_h_i(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{25 * SCREEN_SCALE, 150 * SCREEN_SCALE, 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button l_h_d(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{(int)(86.25 * SCREEN_SCALE), 150 * SCREEN_SCALE, 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
 
-            Button r_h_i(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{WIDTH - 100 - 60, 600, 60, 60});
-            Button r_h_d(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{WIDTH - 345 - 60, 600, 60, 60});
+            Button r_h_i(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{WIDTH - 40 * SCREEN_SCALE, 150 * SCREEN_SCALE, 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button r_h_d(m_renderer, SDL_Color{100, 200, 250, 255}, SDL_Rect{WIDTH - (int)(86.25 * SCREEN_SCALE) - 15 * SCREEN_SCALE, 150 * SCREEN_SCALE, 15 * SCREEN_SCALE, 15 * SCREEN_SCALE});
 
             l_h_i.set_text("<");
             l_h_d.set_text(">");
@@ -1823,8 +1823,8 @@ int main(int argc, char *argv[])
         if (Game_State == STATE_GAMING)
         {
             // initialization
-            ProgressBar power_r(100, 0, {100, 200, 200, 255}, {240, 240, 255, 255}, {WIDTH - 300, HEIGHT - 75, 200, 30});
-            ProgressBar power_l(100, 0, {100, 200, 200, 255}, {240, 240, 255, 255}, {100, HEIGHT - 75, 200, 30});
+            ProgressBar power_r(100, 0, {100, 200, 200, 255}, {240, 240, 255, 255}, {WIDTH - 75 * SCREEN_SCALE, HEIGHT - (int)(18.75 * SCREEN_SCALE), 50 * SCREEN_SCALE, (int)(7.5 * SCREEN_SCALE)});
+            ProgressBar power_l(100, 0, {100, 200, 200, 255}, {240, 240, 255, 255}, {25 * SCREEN_SCALE, HEIGHT - (int)(18.75 * SCREEN_SCALE), 50 * SCREEN_SCALE, (int)(7.5 * SCREEN_SCALE)});
 
             Timer game_timer;
             game_timer.pause();
@@ -1854,12 +1854,12 @@ int main(int argc, char *argv[])
             SDL_Texture *pause_menu_txtr = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, WIDTH * 3 / 4, HEIGHT * 4 / 5);
             SDL_Rect pause_menu_bounds{WIDTH / 8, HEIGHT / 10, WIDTH * 3 / 4, HEIGHT * 4 / 5};
             bool paused = false;
-            Button btn_resume(m_renderer, SDL_Color{100, 255, 100, 255}, SDL_Rect{WIDTH / 2 - 100, 200, 200, 60});
-            Button btn_main_menu(m_renderer, SDL_Color{220, 220, 220, 255}, SDL_Rect{WIDTH / 2 - 100, 320, 200, 60});
-            Button btn_quit(m_renderer, SDL_Color{255, 100, 100, 255}, SDL_Rect{WIDTH / 2 - 100, 440, 200, 60});
-            btn_resume.set_text("resume");
-            btn_main_menu.set_text("main menu");
-            btn_quit.set_text("quit");
+            Button btn_resume(m_renderer, SDL_Color{100, 255, 100, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 50 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_main_menu(m_renderer, SDL_Color{220, 220, 220, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 80 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button btn_quit(m_renderer, SDL_Color{255, 100, 100, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 110 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            btn_resume.set_text("Resume");
+            btn_main_menu.set_text("Main menu");
+            btn_quit.set_text("Quit");
 
             string powers_str[] = {"Kick Fire", "Punch", "Ball Eater", "Thief"};
             ball.set_ay(BALL_GRAVITY);
@@ -1875,8 +1875,8 @@ int main(int argc, char *argv[])
             while (Game_State == STATE_GAMING)
             {
                 clear_window(m_renderer);
-                left_crowd_height = HEIGHT / 2 - (left_goal_counter == 0 ? 0 : 100);
-                right_crowd_height = HEIGHT / 2 - (right_goal_counter == 0 ? 0 : 100);
+                left_crowd_height = HEIGHT / 2 - (left_goal_counter == 0 ? 0 : 25 * SCREEN_SCALE);
+                right_crowd_height = HEIGHT / 2 - (right_goal_counter == 0 ? 0 : 25 * SCREEN_SCALE);
 
                 if (right_goal_counter > 0)
                 {
@@ -1891,9 +1891,9 @@ int main(int argc, char *argv[])
                         left_goal_counter = 0;
                 }
 
-                draw_texture_on_texture_center(m_renderer, NULL, crowd, {WIDTH / 4, left_crowd_height}, HEIGHT - 500);
-                draw_texture_on_texture_center(m_renderer, NULL, crowd, {WIDTH / 4 * 3, right_crowd_height}, HEIGHT - 500);
-                draw_texture_on_texture_bottom(m_renderer, NULL, background, {WIDTH / 2, HEIGHT - BOTTOM_MARGIN}, 300);
+                draw_texture_on_texture_center(m_renderer, NULL, crowd, {WIDTH / 4, left_crowd_height}, HEIGHT - 125 * SCREEN_SCALE);
+                draw_texture_on_texture_center(m_renderer, NULL, crowd, {WIDTH / 4 * 3, right_crowd_height}, HEIGHT - 125 * SCREEN_SCALE);
+                draw_texture_on_texture_bottom(m_renderer, NULL, background, {WIDTH / 2, HEIGHT - BOTTOM_MARGIN}, 75 * SCREEN_SCALE);
 
                 if (e->key.keysym.sym == SDLK_ESCAPE)
                 {
@@ -1952,8 +1952,8 @@ int main(int argc, char *argv[])
                 }
 
                 // render powers
-                SDL_Rect p_l = draw_texture_on_texture_left(m_renderer, NULL, power_icon, {110, 100}, 30);
-                SDL_Rect p_r = draw_texture_on_texture_left(m_renderer, NULL, power_icon, {WIDTH - 190, 100}, 30);
+                SDL_Rect p_l = draw_texture_on_texture_left(m_renderer, NULL, power_icon, {(int)(27.5 * SCREEN_SCALE), 25 * SCREEN_SCALE}, (int)(7.5 * SCREEN_SCALE));
+                SDL_Rect p_r = draw_texture_on_texture_left(m_renderer, NULL, power_icon, {WIDTH - ((int)(47.5 * SCREEN_SCALE)), 25 * SCREEN_SCALE}, (int)(7.5 * SCREEN_SCALE));
                 render_text_left(m_renderer, powers_str[l_char.get_power()].c_str(), new SDL_Point{p_l.x + p_l.w, p_l.y + p_l.h / 2}, NULL, {255, 255, 220, 255});
                 render_text_left(m_renderer, powers_str[r_char.get_power()].c_str(), new SDL_Point{p_r.x + p_r.w, p_r.y + p_r.h / 2}, NULL, {255, 255, 220, 255});
 
@@ -1964,15 +1964,15 @@ int main(int argc, char *argv[])
                 ball.render(m_renderer);
                 power_l.render(m_renderer);
                 power_r.render(m_renderer);
-                SDL_Rect l = draw_texture_on_texture_center(m_renderer, NULL, goal_l, SDL_Point{75, HEIGHT - BOTTOM_MARGIN - 80}, 160);
-                SDL_Rect r = draw_texture_on_texture_center(m_renderer, NULL, goal_r, SDL_Point{WIDTH - 75, HEIGHT - BOTTOM_MARGIN - 80}, 160);
+                SDL_Rect l = draw_texture_on_texture_center(m_renderer, NULL, goal_l, SDL_Point{(int)(18.75 * SCREEN_SCALE), HEIGHT - BOTTOM_MARGIN - 20 * SCREEN_SCALE}, 40 * SCREEN_SCALE);
+                SDL_Rect r = draw_texture_on_texture_center(m_renderer, NULL, goal_r, SDL_Point{WIDTH - ((int)(18.75 * SCREEN_SCALE)), HEIGHT - BOTTOM_MARGIN - 20 * SCREEN_SCALE }, 40 * SCREEN_SCALE);
 
                 power_r.set_value(r_char.get_power_precent());
                 power_l.set_value(l_char.get_power_precent());
 
                 // Display names and goals and power bar
-                render_text_left(m_renderer, l_char.get_name().c_str(), new SDL_Point{100, 50}, names_font, {255, 255, 220, 255});
-                render_text_left(m_renderer, r_char.get_name().c_str(), new SDL_Point{WIDTH - 200, 50}, names_font, {255, 255, 220, 255});
+                render_text_left(m_renderer, l_char.get_name().c_str(), new SDL_Point{25 * SCREEN_SCALE, (int)(12.5 * SCREEN_SCALE)}, names_font, {255, 255, 220, 255});
+                render_text_left(m_renderer, r_char.get_name().c_str(), new SDL_Point{WIDTH - 50 * SCREEN_SCALE, (int)(12.5 * SCREEN_SCALE)}, names_font, {255, 255, 220, 255});
                 string score_board = to_string(l_char.get_num_of_goals());
                 string gtime = to_string(game_timer.get_time());
 
@@ -1984,7 +1984,7 @@ int main(int argc, char *argv[])
                     c = (Uint8)(100);
                 }
 
-                render_text_center(m_renderer, gtime.c_str(), new SDL_Point{WIDTH / 2, HEIGHT - 50}, time_font, {240, c, c, 255});
+                render_text_center(m_renderer, gtime.c_str(), new SDL_Point{WIDTH / 2, HEIGHT - ((int)(12.5 * SCREEN_SCALE))}, time_font, {240, c, c, 255});
                 render_text_center(m_renderer, score_board.c_str(), new SDL_Point{WIDTH / 2, 50}, scores_font, {100, 100, 250, 255});
 
                 // check for goals collisions
@@ -2000,9 +2000,9 @@ int main(int argc, char *argv[])
                 }
 
                 // Check for goals
-                if ((ball_center.x > WIDTH - 115 || ball_center.x < 115) && ball_center.y > HEIGHT - BOTTOM_MARGIN - 160 - 20)
+                if ((ball_center.x > WIDTH - ((int)(28.75 * SCREEN_SCALE)) || ball_center.x < ((int)(28.75 * SCREEN_SCALE))) && ball_center.y > HEIGHT - BOTTOM_MARGIN - (45 * SCREEN_SCALE))
                 {
-                    if (ball_center.x > WIDTH - 200)
+                    if (ball_center.x > WIDTH - 50 * SCREEN_SCALE)
                     {
                         l_char.add_goal();
                         play_short_sounds("raw/sounds/goal-reaction.wav");
@@ -2039,19 +2039,19 @@ int main(int argc, char *argv[])
 
         if (Game_State == STATE_END_MENU)
         {
-            Button replay_btn(m_renderer, SDL_Color{210, 250, 200, 255}, SDL_Rect{WIDTH / 2 - 100, 250, 200, 60});
-            Button main_btn(m_renderer, SDL_Color{250, 220, 250, 255}, SDL_Rect{WIDTH / 2 - 100, 400, 200, 60});
-            Button quit_btn(m_renderer, SDL_Color{250, 210, 200, 255}, SDL_Rect{WIDTH / 2 - 100, 550, 200, 60});
+            Button replay_btn(m_renderer, SDL_Color{210, 250, 200, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, (int)(62.5 * SCREEN_SCALE), 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button main_btn(m_renderer, SDL_Color{250, 220, 250, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, 100 * SCREEN_SCALE, 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
+            Button quit_btn(m_renderer, SDL_Color{250, 210, 200, 255}, SDL_Rect{WIDTH / 2 - 25 * SCREEN_SCALE, (int)(137.5 * SCREEN_SCALE), 50 * SCREEN_SCALE, 15 * SCREEN_SCALE});
             replay_btn.set_text("Play again");
             main_btn.set_text("Main menu");
             quit_btn.set_text("Quit");
-            TTF_Font *welcome_font = TTF_OpenFont(FONT_ADDR, 50);
+            TTF_Font *welcome_font = TTF_OpenFont(FONT_ADDR, ((int)(12.5 * SCREEN_SCALE)));
 
             while (Game_State == STATE_END_MENU)
             {
                 clear_window(m_renderer);
 
-                render_text_center(m_renderer, "End", new SDL_Point{WIDTH / 2, 100}, welcome_font, {200, 200, 200, 255});
+                render_text_center(m_renderer, "End", new SDL_Point{WIDTH / 2, 25 * SCREEN_SCALE}, welcome_font, {200, 200, 200, 255});
 
                 replay_btn.render(m_renderer);
                 main_btn.render(m_renderer);
@@ -2088,7 +2088,7 @@ int main(int argc, char *argv[])
         {
             Timer time;
             time.set_alarm(2);
-            TTF_Font *font = TTF_OpenFont(FONT_ADDR, 70);
+            TTF_Font *font = TTF_OpenFont(FONT_ADDR, 17.5 * SCREEN_SCALE);
 
             while (Game_State == STATE_QUIT)
             {
