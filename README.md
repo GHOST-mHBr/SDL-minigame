@@ -1,8 +1,20 @@
-# SDL-minigame
-head football. The university final project:)
+
+
+# SDL-minigame-[Edited And Published By [mhrohani1385](https://github.com/mhrohani1385)]
+
+head football. The university final project **( Of [GHOST-mHBr](https://github.com/GHOST-mHBr/SDL-minigame) )** . Debugged By [mhrohani1385](https://github.com/mhrohani1385) .
+
+
+
+## Changes :
+
+- Optimization Keyboard and Mouse Controlling
+- Change Screen size and Cleanup code (For customize screen size see [here](###))
+- Optimize Gravity and Speed of Ball and Character
+
 
 ## Installation
-at first you should install SDL2, SDL2_gfx, SDL2_image, SDL2_ttf.
+at first you should install SDL2, SDL2_gfx, SDL2_image, SDL2_ttf, SDL2_mixer.
 in debian based distributions this command will do that:  
 `sudo apt install libsdl2*`  
 also you will need g++ as compiler. You can install it by runnig this:  
@@ -27,3 +39,9 @@ the powers can be enabled by pressing 's' or bottom arrow. it is obvious that po
 you have 90 seconds. if any player scores more than 10 the game will finish!
 
 Enjoy dude!
+
+### To change screen size manually change this line of code and remake project :
+
+```c++
+15  | #define SCREEN_SCALE [ Menual screen scale between 1..6 ]
+```
