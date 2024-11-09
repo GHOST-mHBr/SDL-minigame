@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/Program.dir/main.cpp.o -o Program  -lSDL2 -lSDL2_gfx -lSDL2_mixer -lSDL2_image -lSDL2_ttf

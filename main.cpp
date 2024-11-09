@@ -11,7 +11,7 @@
 #define DATA_FILE_ADDR "./data/games/"
 
 #define CHAR_RAW_ROOT "./raw/Char/"
-#define FONT_ADDR "font.otf"
+#define FONT_ADDR "raw/fonts/font.otf"
 
 #define DELAY 40
 #define GRAVITY 13
@@ -933,7 +933,7 @@ private:
     SDL_Color back_color;
     SDL_Rect bounds;
     SDL_Texture *back_texture = NULL;
-    TTF_Font *font = TTF_OpenFont("./arial.ttf", 20);
+    TTF_Font *font = TTF_OpenFont("./raw/fonts/arial.ttf", 20);
 
 public:
     ProgressBar(Uint16 total_value, Uint16 current_value, SDL_Color front_color, SDL_Color back_color, SDL_Rect bounds)
@@ -1364,8 +1364,8 @@ int main(int argc, char *argv[])
     srand(time(nullptr));
 
     TTF_Font *names_font = TTF_OpenFont(FONT_ADDR, 50);
-    TTF_Font *time_font = TTF_OpenFont("score_board.ttf", 60);
-    TTF_Font *scores_font = TTF_OpenFont("score_board.ttf", 80);
+    TTF_Font *time_font = TTF_OpenFont("./raw/fonts/score_board.ttf", 60);
+    TTF_Font *scores_font = TTF_OpenFont("./raw/fonts/score_board.ttf", 80);
     gfont = TTF_OpenFont(FONT_ADDR, 20);
 
     SDL_Point ball_center{WIDTH / 2, HEIGHT - BOTTOM_MARGIN};
